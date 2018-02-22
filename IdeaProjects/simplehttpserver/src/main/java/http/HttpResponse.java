@@ -2,6 +2,7 @@ package http;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import sun.nio.cs.US_ASCII;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,8 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 
 public class HttpResponse {
@@ -30,22 +29,43 @@ public class HttpResponse {
 
         switch (method) {
             case "GET":
-                String url = request.getUrl();
+                final String url = request.getUrl();
 
-                Path path = Paths.get(".", url);
+                final Path path = Paths.get(".", url);
 
                 if (!Files.exists(path)) {
                     fillHeaders(HttpStatus.NOT_FOUND);
                     fillBody("<h1>The requested resource is not found</h1>");
+                    return;
                 }
 
-                fillBody("Test line");
+                if (Files.isDirectory(path)) {
+                    // TODO show html listinds for directory with links to files
+                    fillHeaders(HttpStatus.OK);
+                    fillBody("<h1>Unsupported operation</h1>");
+                } else {
+                    sendFile(path);
+                }
 
                 break;
             case "POST":
                 break;
             default:
                 break;
+        }
+    }
+
+    private void sendFile(Path path) {
+
+        try {
+
+            body = Files.readAllBytes(path);
+            fillHeaders(HttpStatus.OK);
+
+        } catch (IOException e) {
+            logger.error("", e);
+            fillHeaders(HttpStatus.SERVER_ERROR);
+            fillBody("<p>Error showing file<p>");
         }
     }
 
@@ -72,7 +92,7 @@ public class HttpResponse {
         headers.add("Connection: close");
     }
 
-    private void fillBody(String str){
+    private void fillBody(String str) {
         body = str.getBytes(StandardCharsets.UTF_8);
     }
 }
