@@ -39,7 +39,7 @@ public class HttpResponse {
                     fillBody("<h1>The requested resource is not found</h1>");
                 }
 
-                fillBody("test");
+                fillBody("Test line");
 
                 break;
             case "POST":
