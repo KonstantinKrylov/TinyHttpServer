@@ -2,11 +2,9 @@ package http;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.nio.cs.US_ASCII;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,7 +21,7 @@ public class HttpResponse {
 
     List<String> headers = new ArrayList<>();
 
-    public HttpResponse(HttpRequest request) {
+    public HttpResponse(HttpRequest request) throws IOException {
         final String method = request.getMethod();
 
 
@@ -31,7 +29,7 @@ public class HttpResponse {
             case "GET":
                 final String url = request.getUrl();
 
-                final Path path = Paths.get(".", url);
+                final Path path = Paths.get(".",url);
 
                 if (!Files.exists(path)) {
                     fillHeaders(HttpStatus.NOT_FOUND);
@@ -40,9 +38,16 @@ public class HttpResponse {
                 }
 
                 if (Files.isDirectory(path)) {
-                    // TODO show html listinds for directory with links to files
+                    // TODO show html listings for directory with links to files
                     fillHeaders(HttpStatus.OK);
-                    fillBody("<h1>Unsupported operation</h1>");
+                    List<String> temp = new ArrayList<>();
+                    Files.list(path).forEach(childPath -> temp.add("<a href=\"" + childPath.getParent() + "/" + childPath.getFileName() + "\">"
+                            + childPath.getFileName() + "</a>"));
+                    String bodyFiller = "";
+                    for (String s : temp) {
+                        bodyFiller += s + " ";
+                    }
+                    fillBody(bodyFiller);
                 } else {
                     sendFile(path);
                 }

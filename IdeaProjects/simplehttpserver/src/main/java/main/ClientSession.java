@@ -17,7 +17,7 @@ public class ClientSession implements Runnable {
 
     public ClientSession(Socket socket) {
         this.socket = socket;
-        logger.debug("Connected a client {}", socket);
+        logger.debug("\n\n\nConnected a client {}", socket);
     }
 
     @Override
