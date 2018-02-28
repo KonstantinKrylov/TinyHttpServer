@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 public class HttpResponse {
@@ -33,19 +34,18 @@ public class HttpResponse {
 
                 if (!Files.exists(path)) {
                     fillHeaders(HttpStatus.NOT_FOUND);
-                    fillBody("<h1>The requested resource is not found</h1>");
+                    fillBody("<h1>The requested resource IS not found</h1>");
                     return;
                 }
 
                 if (Files.isDirectory(path)) {
-                    // TODO show html listings for directory with links to files
                     fillHeaders(HttpStatus.OK);
                     List<String> temp = new ArrayList<>();
-                    Files.list(path).forEach(childPath -> temp.add("<a href=\"" + childPath.getParent() + "/" + childPath.getFileName() + "\">"
-                            + childPath.getFileName() + "</a>"));
+                    Files.list(path).forEach(childPath -> temp.add("<a href=\"" + childPath.getFileName() + "/" + "" + "\">"
+                            + childPath.getFileName() + "</a><br>"));
                     String bodyFiller = "";
                     for (String s : temp) {
-                        bodyFiller += s + " ";
+                        if(s.indexOf(".DS_Store")==-1)bodyFiller += s + " ";
                     }
                     fillBody(bodyFiller);
                 } else {
